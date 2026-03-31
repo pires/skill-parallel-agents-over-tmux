@@ -1,0 +1,28 @@
+version: "1"
+name: "swarm-test-pingpong"
+
+# NOTE: targets must be discovered at runtime via:
+#   tmux list-panes -t <session> -F '#{pane_id}'
+# Positional indices like :0.0 break when tmux base-index != 0.
+panes:
+  agent-a:
+    target: "REPLACE_WITH_PANE_ID"
+  agent-b:
+    target: "REPLACE_WITH_PANE_ID"
+
+workflow:
+  type: pingpong
+  agents: [agent-a, agent-b]
+  shared_buffer: swarm-test-pingpong-work
+  nudge_mode: auto
+  max_iterations: 2
+  timeout: 30
+  seed: "Initial design proposal for testing."
+  prompt: |
+    Read buffer: tmux show-buffer -b swarm-test-pingpong-work
+    Add one improvement. Write to file then buffer:
+      cat > /tmp/swarm-test-pingpong-revision.md << 'EOF'
+      <your revision>
+      EOF
+      tmux set-buffer -b swarm-test-pingpong-work "$(cat /tmp/swarm-test-pingpong-revision.md)"
+    Signal done: tmux set-buffer -b swarm-test-pingpong-status-{{agent}} done

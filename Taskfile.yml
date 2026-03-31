@@ -1,0 +1,25 @@
+version: "3"
+
+vars:
+  MARKDOWNLINT_IMAGE: docker.io/davidanson/markdownlint-cli2:v0.22.0
+
+tasks:
+  lint:md:
+    desc: Lint markdown files
+    cmds:
+      - podman run --rm -v {{.ROOT_DIR}}:/workdir:Z {{.MARKDOWNLINT_IMAGE}} '**/*.md' '#.context'
+
+  lint:md:fix:
+    desc: Lint and auto-fix markdown files
+    cmds:
+      - podman run --rm -v {{.ROOT_DIR}}:/workdir:Z {{.MARKDOWNLINT_IMAGE}} --fix '**/*.md' '#.context'
+
+  lint:
+    desc: Run all linters
+    cmds:
+      - task: lint:md
+
+  test:
+    desc: Run integration tests
+    cmds:
+      - bash tests/test_integration.sh

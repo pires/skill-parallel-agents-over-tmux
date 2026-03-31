@@ -1,0 +1,31 @@
+version: "1"
+name: "swarm-test-sequence"
+
+# NOTE: targets must be discovered at runtime via:
+#   tmux list-panes -t <session> -F '#{pane_id}'
+# Positional indices like :0.0 break when tmux base-index != 0.
+panes:
+  agent-a:
+    target: "REPLACE_WITH_PANE_ID"
+  agent-b:
+    target: "REPLACE_WITH_PANE_ID"
+
+workflow:
+  type: sequence
+  steps:
+    - id: step-1
+      type: task
+      agent: agent-a
+      timeout: 30
+      prompt: |
+        Write a one-line design to buffer:
+        tmux set-buffer -b swarm-test-sequence-ideas "Initial idea from agent-a"
+        Signal done: tmux set-buffer -b swarm-test-sequence-status-agent-a done
+    - id: step-2
+      type: task
+      agent: agent-b
+      timeout: 30
+      prompt: |
+        Read buffer: tmux show-buffer -b swarm-test-sequence-ideas
+        Improve it and write back: tmux set-buffer -b swarm-test-sequence-ideas "Improved by agent-b"
+        Signal done: tmux set-buffer -b swarm-test-sequence-status-agent-b done

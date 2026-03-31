@@ -1,0 +1,8 @@
+# markdownlint configuration
+# Run: task lint:md
+
+# Disable line-length — markdown wraps at display, not source
+MD013: false
+
+# Disable table column style — tables are readable as-is
+MD060: false

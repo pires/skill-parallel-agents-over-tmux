@@ -1,0 +1,9 @@
+
+# ctx managed entries
+.context/journal
+.context/journal-site
+.context/journal-obsidian
+.context/logs
+.context/.ctx.key
+.context/state/
+.claude/settings.local.json

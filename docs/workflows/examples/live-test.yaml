@@ -1,0 +1,31 @@
+version: "1"
+name: "swarm-live-pingpong-test"
+
+panes:
+  claude:
+    target: "%11"
+  codex:
+    target: "%12"
+
+workflow:
+  type: pingpong
+  agents: [claude, codex]
+  shared_buffer: swarm-live-pingpong-test-work
+  nudge_mode: manual
+  max_iterations: 2
+  timeout: 120
+  seed: |
+    Design a simple CLI tool called 'hello' that greets users by name.
+    It should accept a --name flag and print "Hello, <name>!".
+    Produce a concrete implementation plan: language choice, file layout,
+    and the main function signature.
+  prompt: |
+    Read the current design by running:
+      tmux show-buffer -b swarm-live-pingpong-test-work
+    Improve it. Write your revision to a file, then update the buffer:
+      cat > /tmp/swarm-live-pingpong-test-revision.md << 'EOF'
+      <your revised content here>
+      EOF
+      tmux set-buffer -b swarm-live-pingpong-test-work "$(cat /tmp/swarm-live-pingpong-test-revision.md)"
+    Signal completion:
+      tmux set-buffer -b swarm-live-pingpong-test-status-{{agent}} done

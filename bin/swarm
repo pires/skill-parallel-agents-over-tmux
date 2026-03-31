@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# swarm — tmux-native coordination for live agent sessions.
+set -euo pipefail
+
+SWARM_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# Source all library files
+source "$SWARM_ROOT/lib/utils/logging.sh"
+source "$SWARM_ROOT/lib/utils/templates.sh"
+source "$SWARM_ROOT/lib/tmux.sh"
+source "$SWARM_ROOT/lib/primitives/task.sh"
+source "$SWARM_ROOT/lib/primitives/parallel.sh"
+source "$SWARM_ROOT/lib/primitives/sequence.sh"
+source "$SWARM_ROOT/lib/primitives/pingpong.sh"
+source "$SWARM_ROOT/lib/coordinator.sh"
+
+usage() {
+  cat <<'EOF'
+Usage: swarm session <manifest.yaml>
+
+Connect live tmux agent sessions through shared buffers and nudges.
+
+Commands:
+  session <manifest>   Run a workflow from a YAML manifest
+
+Options:
+  -h, --help           Show this help
+  -v, --version        Show version
+
+Examples:
+  swarm session docs/workflows/examples/live-test.yaml
+EOF
+}
+
+version() {
+  echo "swarm 0.1.0"
+}
+
+# Check dependencies
+check_deps() {
+  local missing=()
+  for cmd in tmux yq jq; do
+    if ! command -v "$cmd" &>/dev/null; then
+      missing+=("$cmd")
+    fi
+  done
+
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    log_error "Missing dependencies: ${missing[*]}"
+    echo "Install with: brew install ${missing[*]}" >&2
+    return 1
+  fi
+}
+
+# Main
+main() {
+  if [[ $# -eq 0 ]]; then
+    usage
+    exit 1
+  fi
+
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -v|--version)
+      version
+      exit 0
+      ;;
+    session)
+      shift
+      if [[ $# -eq 0 ]]; then
+        log_error "Missing manifest file"
+        echo "Usage: swarm session <manifest.yaml>" >&2
+        exit 1
+      fi
+      check_deps || exit 1
+      run_workflow "$1"
+      ;;
+    *)
+      log_error "Unknown command: $1"
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

@@ -1,0 +1,28 @@
+version: "1"
+name: "swarm-test-parallel"
+
+# NOTE: targets must be discovered at runtime via:
+#   tmux list-panes -t <session> -F '#{pane_id}'
+# Positional indices like :0.0 break when tmux base-index != 0.
+panes:
+  agent-a:
+    target: "REPLACE_WITH_PANE_ID"
+  agent-b:
+    target: "REPLACE_WITH_PANE_ID"
+
+workflow:
+  type: parallel
+  timeout: 30
+  steps:
+    - id: task-a
+      type: task
+      agent: agent-a
+      prompt: |
+        Echo 'hello from agent-a' and signal done:
+        tmux set-buffer -b swarm-test-parallel-status-agent-a done
+    - id: task-b
+      type: task
+      agent: agent-b
+      prompt: |
+        Echo 'hello from agent-b' and signal done:
+        tmux set-buffer -b swarm-test-parallel-status-agent-b done
